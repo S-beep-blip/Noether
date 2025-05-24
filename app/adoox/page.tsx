@@ -7,7 +7,6 @@ import Header from "@/components/header"
 import UploadScreen from "@/components/upload-screen"
 import DocumentViewer from "@/components/document-viewer"
 import { useMediaQuery } from "@/app/hooks/use-media-query"
-import { processFile } from "@/lib/document-processor"
 
 export default function Homeapp() {
   // Document content state
@@ -78,27 +77,62 @@ export default function Homeapp() {
   }, [isMobile])
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
+    const file = e.target.files?.[0];
+    if (!file) return;
 
     try {
-      setLoading(true)
-      setFileName(file.name)
+      setLoading(true);
+      setFileName(file.name);
+
+      // Create FormData and send the file to the backend
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(`Upload failed: ${errorData.error}`);
+      }
+
+      const uploadResult = await uploadResponse.json();
+      console.log('File uploaded successfully:', uploadResult.filePath);
 
       // Only open sidebar on desktop for new document
       if (!isMobile) {
-        setSidebarOpen(true)
+        setSidebarOpen(true);
       }
 
-      const processedText = await processFile(file)
-      setText(processedText)
+      // Call the backend API to process the uploaded file with Gemini
+      const geminiProcessResponse = await fetch('/api/process-with-gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ filePath: uploadResult.filePath }),
+      });
+
+      if (!geminiProcessResponse.ok) {
+        const errorData = await geminiProcessResponse.json();
+        throw new Error(`Gemini processing failed: ${errorData.error}`);
+      }
+
+      const geminiResult = await geminiProcessResponse.json();
+      console.log('Gemini processing successful:', geminiResult.summary);
+
+      // Update the state with the summary from Gemini
+      setText(geminiResult.summary);
+
     } catch (error) {
-      console.error("Error processing file:", error)
-      alert("Error processing file")
+      console.error("Error processing or uploading file:", error);
+      alert(`Error: ${error instanceof Error ? error.message : 'An unknown error occurred'}`);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleNewFile = () => {
     // Reset states for a new file

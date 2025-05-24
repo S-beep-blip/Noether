@@ -25,7 +25,7 @@ export default function UploadScreen({ handleFileUpload, loading }: UploadScreen
     
     const fileType = file.type
     
-    if (fileType === "text/plain" || fileType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
+    if (true) {
       // Set the selected file
       setSelectedFile(file)
       
