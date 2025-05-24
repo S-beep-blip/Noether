@@ -7,8 +7,8 @@ export default function Footer() {
   const [isAnimating, setIsAnimating] = useState(false)
   const animationRef = useRef<number | null>(null)
 
-  const baseText = "Active Dictionary"
-  const suffixText = " - AI-Powered context-aware definitions for non-interruptive reading"
+  const baseText = "adoox"
+  const suffixText = " - AI-Powered context-aware definitions for non-interruptive understanding."
   const typingSpeed = 35
   const pauseDuration = 4000
 
@@ -78,9 +78,9 @@ export default function Footer() {
               WebkitTouchCallout: 'none'
             }}
           >
-            <span className="mr-1">By</span>
+            <span className="mr-1">By The</span>
             <span className="text-xl text-black">ado</span>
-            <span className="text-xl text-[#ffbd59]">sort</span>
+            <span className="text-xl text-black">net company</span>
           </div>
 
           {/* Typing effect with Beta Badge */}
@@ -107,7 +107,7 @@ export default function Footer() {
             </div>
             <span>{typedText}</span>
             <span className="inline-block w-[2px] h-4 bg-black ml-1 align-middle animate-pulse" />
-            <span> • © {new Date().getFullYear()}</span>
+            <span> • © {new Date().getFullYear()} all rights reserved</span>
           </div>
 
           {/* Footer note - fully non-interactive */}

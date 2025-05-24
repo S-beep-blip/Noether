@@ -7,9 +7,10 @@ interface TextDisplayProps {
   text: string
   onTextSelection: () => void
   onWordHover: (word: string, position: { x: number; y: number }) => void
+  hoverMode: boolean
 }
 
-export default function TextDisplay({ text, onTextSelection, onWordHover }: TextDisplayProps) {
+export default function TextDisplay({ text, onTextSelection, onWordHover, hoverMode }: TextDisplayProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null)
   const progressTimerRef = useRef<NodeJS.Timeout | null>(null)
@@ -65,6 +66,9 @@ export default function TextDisplay({ text, onTextSelection, onWordHover }: Text
 
     // Handle text selection
     const handleSelection = () => {
+      // Don't process selection if we're in hover mode
+      if (hoverMode) return
+      
       const selection = window.getSelection()
       if (!selection || selection.toString().trim() === "") return
       onTextSelection()
@@ -72,6 +76,12 @@ export default function TextDisplay({ text, onTextSelection, onWordHover }: Text
 
     // Handle word hover
     const handleHover = (clientX: number, clientY: number) => {
+      // Don't process hover if we're not in hover mode
+      if (!hoverMode) {
+        resetHoverState()
+        return
+      }
+      
       resetHoverState()
       const result = getWordAtPosition(clientX, clientY)
       if (!result || !result.word || !/^[a-zA-Z0-9'-]+$/.test(result.word)) return
@@ -126,32 +136,29 @@ export default function TextDisplay({ text, onTextSelection, onWordHover }: Text
       if (duration < 300 && deltaX < 10 && deltaY < 10) {
         handleSelection()
         
-        // Also trigger hover for single word on quick tap
-        const result = getWordAtPosition(touch.clientX, touch.clientY)
-        if (result?.word && /^[a-zA-Z0-9'-]+$/.test(result.word)) {
-          const rect = result.range.getBoundingClientRect()
-          onWordHover(result.word, {
-            x: rect.left + rect.width / 2,
-            y: rect.bottom,
-          })
-        }
+        // Don't trigger hover for single word on mobile even if in hover mode
+        // Mobile should always use selection mode
       }
       
       touchStartRef.current = null
     }
 
-    // Add appropriate event listeners
+    // Add always-on event listeners
     if (isMobile) {
       container.addEventListener('touchstart', handleTouchStart)
       container.addEventListener('touchend', handleTouchEnd)
     } else {
       container.addEventListener('mouseup', handleMouseUp)
+    }
+
+    // Add conditional hover listeners only when in hover mode and not on mobile
+    if (!isMobile && hoverMode) {
       container.addEventListener('mousemove', handleMouseMove)
       container.addEventListener('mouseleave', handleMouseLeave)
     }
 
     return () => {
-      // Clean up all event listeners
+      // Cleanup all listeners
       container.removeEventListener('mouseup', handleMouseUp)
       container.removeEventListener('mousemove', handleMouseMove)
       container.removeEventListener('mouseleave', handleMouseLeave)
@@ -159,7 +166,7 @@ export default function TextDisplay({ text, onTextSelection, onWordHover }: Text
       container.removeEventListener('touchend', handleTouchEnd)
       resetHoverState()
     }
-  }, [onTextSelection, onWordHover, isMobile])
+  }, [onTextSelection, onWordHover, isMobile, hoverMode])
 
   const resetHoverState = () => {
     if (hoverTimerRef.current) clearTimeout(hoverTimerRef.current)
@@ -188,7 +195,7 @@ export default function TextDisplay({ text, onTextSelection, onWordHover }: Text
       </div>
 
       {/* Hover progress indicator (desktop only) */}
-      {hoveredWord && hoverPositionRef.current && !isMobile && (
+      {hoverMode && hoveredWord && hoverPositionRef.current && !isMobile && (
         <div
           className="fixed pointer-events-none z-30"
           style={{

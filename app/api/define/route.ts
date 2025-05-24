@@ -3,7 +3,7 @@ import { GoogleGenAI } from "@google/genai"
 export const runtime = 'edge'
 
 // Initialize the Google Gemini AI client with the API key
-const ai = new GoogleGenAI({ apiKey: process.env.NEXT_PUBLIC_GEMINI_API_KEY as string })
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY as string })
 
 export async function POST(request: Request) {
   try {

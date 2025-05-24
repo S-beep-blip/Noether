@@ -85,3 +85,32 @@
   }
 }
 
+@font-face {
+  font-family: 'Hero Regular';
+  src: url('/fonts/hero-regular.woff2') format('woff2'),
+       url('/fonts/hero-regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.hero-regular {
+  font-family: 'Hero Regular', sans-serif;
+}
+
+@layer utilities {
+  /* Skeleton wave animation */
+  .animate-wave {
+    animation: wave 1.5s infinite;
+  }
+
+  @keyframes wave {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}
+
+
+
+
