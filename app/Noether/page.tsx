@@ -88,7 +88,7 @@ export default function Homeapp() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const uploadResponse = await fetch('/api/upload', {
+      const uploadResponse = await fetch('http://localhost:8000/api/upload', {
         method: 'POST',
         body: formData,
       });
@@ -107,7 +107,7 @@ export default function Homeapp() {
       }
 
       // Call the backend API to process the uploaded file with Gemini
-      const geminiProcessResponse = await fetch('/api/process-with-gemini', {
+      const geminiProcessResponse = await fetch('http://localhost:8000/api/process-with-gemini', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ export default function Homeapp() {
         : pages[currentPage - 1] // In page mode, use just the current page
 
     try {
-      const response = await fetch("/api/define", {
+      const response = await fetch("http://localhost:8000/api/define", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
