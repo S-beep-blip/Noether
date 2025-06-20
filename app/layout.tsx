@@ -4,6 +4,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import Footer from "@/components/footer"
+import { LayoutWrapper } from "@/components/layout-wrapper"
 import { Toaster } from 'react-hot-toast'
 
 import { cn } from "@/lib/utils"
@@ -14,7 +15,7 @@ const inter = Inter({
 })
 
 export const metadata = {
-  title: "adoox",
+  title: "Noether",
   description: "Get context-aware definitions powered by Google's Gemini AI",
 }
 
@@ -43,9 +44,10 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <TooltipProvider>
-            {children}
-            <Toaster position="top-right" />
-            <Footer />
+            <LayoutWrapper>
+              {children}
+              <Toaster position="top-right" />
+            </LayoutWrapper>
           </TooltipProvider>
         </ThemeProvider>
       </body>

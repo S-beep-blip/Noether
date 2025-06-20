@@ -53,17 +53,17 @@ export default function Navbar() {
           {/* Replace Mountain icon with your SVG logo */}
           <div className="relative w-12 h-12">
             <Image 
-              src="/logoo.png" 
-              alt="adoox logo" 
-              width={32} 
-              height={32} 
+              src="/Sollem - Logo.svg" 
+              alt="Sollem logo" 
+              width={48} 
+              height={48} 
               className="object-contain"
               priority
             />
           </div>
-          <div className="relative inline-block hidden lg:inline-block -ml-3 top-2">
+          <div className="relative inline-block hidden lg:inline-block top-2">
             <h1 className="text-3xl font-semibold select-none hero-regular">
-              <span className="text-black">a</span><span className="text-[#ffbd59]">doox</span>
+              <span className="text-black">Noe</span><span className="text-[#ffbd59]">ther</span>
             </h1>
             <span className="absolute -top-3 -right-8 bg-black text-white text-[9px] px-1 py-0.5 rounded font-medium select-none"
               style={{
@@ -79,9 +79,9 @@ export default function Navbar() {
         <div className="lg:hidden flex items-center justify-center">
           <Link 
             href="/subscriptions"
-            className="flex items-center justify-center select-none px-4 py-2 bg-black text-white font-medium rounded-md hover:bg-[#ffbd59] transition-colors text-sm"
+            className="flex items-center justify-center hero-regular select-none px-4 py-2 bg-black text-white font-medium rounded-md hover:bg-[#ffbd59] transition-colors text-sm"
           >
-            Try Premium
+            Try Pro
           </Link>
         </div>
 
@@ -96,9 +96,9 @@ export default function Navbar() {
           
           <Link 
             href="/subscriptions"
-            className="flex items-center justify-center px-4 py-2 bg-black text-white font-medium rounded-md hover:bg-[#ffbd59] transition-colors text-sm"
+            className="flex items-center justify-center px-4 py-2 bg-black hero-regular text-white font-medium rounded-md hover:bg-[#ffbd59] transition-colors text-sm"
           >
-            Try Premium
+            Try Pro
           </Link>
           
           <Link 
@@ -132,12 +132,12 @@ export default function Navbar() {
           <div className="flex flex-col h-screen">
             {/* Mobile Menu Header */}
             <div className="flex items-center justify-between border-b border-gray-200 p-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 {/* Use the same logo in mobile menu */}
                 <div className="relative w-12 h-12">
                   <Image 
-                    src="/logoo.png" 
-                    alt="adoread logo" 
+                    src="/Sollem - Logo.svg" 
+                    alt="Sollem logo" 
                     width={48} 
                     height={48} 
                     className="object-contain"
@@ -146,7 +146,7 @@ export default function Navbar() {
                 </div>
                 <div className="relative inline-block top-2">
                   <h1 className="text-3xl font-semibold select-none hero-regular">
-                    <span className="text-black">a</span><span className="text-[#ffbd59]">doox</span>
+                    <span className="text-black">Noe</span><span className="text-[#ffbd59]">ther</span>
                   </h1>
                   <span className="absolute -top-3 -right-8 bg-black text-white text-[9px] px-1 py-0.5 rounded font-medium select-none"
                     style={{
@@ -198,7 +198,7 @@ export default function Navbar() {
                   className="block w-full rounded-md bg-black py-2 px-4 text-center text-base font-medium text-white hover:bg-[#ffbd59] transition-colors"
                   onClick={closeMenu}
                 >
-                  Try Premium
+                  Try Pro
                 </Link>
               </div>
               

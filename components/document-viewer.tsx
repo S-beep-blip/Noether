@@ -195,11 +195,6 @@ export default function DocumentViewer({
         <div
           ref={contentRef}
           className={`min-h-full w-full max-w-4xl mx-auto py-8 px-4 md:px-12 ${getThemeClasses()}`}
-          style={{
-            fontFamily,
-            fontSize: `${fontSize}px`,
-            lineHeight,
-          }}
         >
           {pages.map((pageContent, index) => (
             <div
@@ -217,6 +212,9 @@ export default function DocumentViewer({
                 onTextSelection={handleTextSelection}
                 onWordHover={handleWordHover}
                 hoverMode={hoverMode}
+                fontSize={fontSize}
+                fontFamily={fontFamily}
+                lineHeight={lineHeight}
               />
             </div>
           ))}
@@ -232,9 +230,6 @@ export default function DocumentViewer({
               width: isMobile ? "100%" : "8.5in",
               minHeight: isMobile ? "auto" : "11in",
               padding: isMobile ? "1rem" : "1in",
-              fontFamily,
-              fontSize: `${fontSize}px`,
-              lineHeight,
             }}
           >
             <TextDisplay
@@ -242,13 +237,15 @@ export default function DocumentViewer({
               onTextSelection={handleTextSelection}
               onWordHover={handleWordHover}
               hoverMode={hoverMode}
+              fontSize={fontSize}
+              fontFamily={fontFamily}
+              lineHeight={lineHeight}
             />
           </div>
         </div>
       )
     }
   }
-
   // Calculate main content width based on sidebar state
   const mainContentClass =
     sidebarOpen && !isMobile

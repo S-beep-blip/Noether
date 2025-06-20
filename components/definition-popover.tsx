@@ -237,7 +237,7 @@ export default function DefinitionPopover({
       setChatMessages([
         {
           sender: "assistant",
-          text: "Hi! I'm your document assistant. You can ask me questions about the uploaded document or anything else.",
+          text: "Hi! I'm Noether AI your document files assistant. You can ask me questions about the uploaded document or anything else.",
         },
       ])
     }
@@ -494,7 +494,7 @@ export default function DefinitionPopover({
                   )}
                   <div className="min-w-0">
                     <h3 className="font-medium text-sm md:text-base truncate" title={word}>
-                      {showChat ? "Document Assistant" : formattedWord}
+                      {showChat ? "adoox AI" : formattedWord}
                     </h3>
                   </div>
                   {isHoverMode && !showChat && (

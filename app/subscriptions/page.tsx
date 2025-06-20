@@ -1,347 +1,219 @@
-"use client"
+'use client';
+import React, { useState } from 'react';
+import { Check, Star, Zap, Crown, ChevronDown } from 'lucide-react';
 
-import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import { Check, Zap, Sparkles, ChevronLeft, Clock } from 'lucide-react';
-import Link from 'next/link';
+const SubscriptionPage = () => {
+  const [selectedPlan, setSelectedPlan] = useState('pro');
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-export default function SubscriptionPlans() {
-  const [hoveredPlan, setHoveredPlan] = useState<'basic' | 'premium' | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [greeting, setGreeting] = useState('');
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
-
-  // Check if we're on mobile
-  useEffect(() => {
-    const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 1024);
-    };
-    
-    checkIfMobile();
-    window.addEventListener('resize', checkIfMobile);
-    
-    return () => {
-      window.removeEventListener('resize', checkIfMobile);
-      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
-    };
-  }, []);
-
-  // Set greeting based on time of day
-  useEffect(() => {
-    const updateGreeting = () => {
-      const hour = new Date().getHours();
-      let newGreeting = '';
-      
-      if (hour >= 5 && hour < 12) {
-        newGreeting = 'Good morning';
-      } else if (hour >= 12 && hour < 18) {
-        newGreeting = 'Good afternoon';
-      } else {
-        newGreeting = 'Good evening';
-      }
-      
-      setGreeting(newGreeting);
-    };
-    
-    updateGreeting();
-    // Update greeting every minute in case user is on the page during time change
-    const intervalId = setInterval(updateGreeting, 60000);
-    
-    return () => clearInterval(intervalId);
-  }, []);
-
-  // Handle scroll events for mobile
-  useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container || !isMobile) return;
-
-    const handleScroll = () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-      scrollTimeoutRef.current = setTimeout(() => {
-        const scrollPosition = container.scrollLeft;
-        const scrollWidth = container.scrollWidth;
-        const planCount = Object.keys(plans).length;
-        const scrollPerPlan = scrollWidth / planCount;
-        
-        const newIndex = Math.round(scrollPosition / scrollPerPlan * (planCount - 1));
-        setActiveIndex(newIndex);
-        setHoveredPlan(Object.keys(plans)[newIndex] as 'basic' | 'premium');
-      }, 100);
-    };
-
-    container.addEventListener('scroll', handleScroll);
-    return () => {
-      container.removeEventListener('scroll', handleScroll);
-    };
-  }, [isMobile]);
-
-  const plans = {
-    basic: {
-      name: "Basic",
-      price: "$9.99",
-      period: "per month",
-      features: [
-        "Access to core features",
-        "Basic analytics",
-        "Email support",
-        "5 projects limit"
-      ],
-      image: "/Godfather-loveit.svg",
-      cta: "Get Started"
+  const faqs = [
+    {
+      question: "Can I change my plan at any time?",
+      answer: "Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any billing differences."
     },
-    premium: {
-      name: "Premium",
-      price: "$29.99",
-      period: "per month",
-      features: [
-        "All Basic features plus",
-        "Advanced analytics",
-        "Priority support",
-        "Unlimited projects",
-        "Early access to new features"
-      ],
-      image: "/Godfather-realdeal.svg",
-      cta: "Go Premium"
+    {
+      question: "Is there a free trial available?",
+      answer: "Absolutely! Our Free plan gives you full access to core features with generous limits. No credit card required to get started."
+    },
+    {
+      question: "What payment methods do you accept?",
+      answer: "We accept all major credit cards, PayPal, and bank transfers for enterprise customers. All payments are processed securely through Stripe."
+    },
+    {
+      question: "Do you offer discounts for students or nonprofits?",
+      answer: "Yes! We offer 50% discounts for verified students and qualifying nonprofit organizations. Contact our support team to apply."
+    },
+    {
+      question: "What happens if I exceed my plan limits?",
+      answer: "We'll notify you before you reach your limits. You can either upgrade your plan or purchase additional resources as needed."
+    },
+    {
+      question: "Is my data secure and backed up?",
+      answer: "Your data is encrypted at rest and in transit. We perform daily backups and maintain 99.9% uptime with enterprise-grade security measures."
     }
-  };
+  ];
 
-  // Smooth scroll to plan on mobile
-  const scrollToPlan = (index: number) => {
-    const container = scrollContainerRef.current;
-    if (!container || !isMobile) return;
-
-    const scrollWidth = container.scrollWidth;
-    const planCount = Object.keys(plans).length;
-    const scrollPosition = (scrollWidth / planCount) * index;
-    
-    container.scrollTo({
-      left: scrollPosition,
-      behavior: 'smooth'
-    });
-  };
+  const plans = [
+    {
+      id: 'free',
+      name: 'Free',
+      price: 0,
+      description: 'Perfect for getting started',
+      features: [
+        'Up to 3 projects',
+        '5GB storage',
+        'Basic templates',
+        'Community support',
+        'Standard integrations',
+        'Basic analytics'
+      ],
+      icon: <Star className="w-5 h-5" />,
+      buttonText: 'Get Started Free',
+      buttonStyle: 'border-2 border-gray-300 text-gray-900 hover:border-gray-400 hover:bg-gray-50'
+    },
+    {
+      id: 'pro',
+      name: 'Professional',
+      price: 29,
+      description: 'Best for professionals and teams',
+      features: [
+        'Unlimited projects',
+        '100GB storage',
+        'Premium templates',
+        'Priority support',
+        'Advanced analytics',
+        'Team collaboration',
+        'Custom integrations',
+        'API access'
+      ],
+      icon: <Zap className="w-5 h-5" />,
+      buttonText: 'Start Pro Plan',
+      buttonStyle: 'bg-yellow-400 text-black hover:bg-yellow-500 border-2 border-yellow-400',
+      popular: true
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      price: 99,
+      description: 'For large teams and organizations',
+      features: [
+        'Everything in Pro',
+        'Unlimited storage',
+        'White-label solution',
+        'Dedicated support manager',
+        'Custom development',
+        'SLA guarantee',
+        'Advanced security',
+        'Multi-region hosting'
+      ],
+      icon: <Crown className="w-5 h-5" />,
+      buttonText: 'Get Enterprise',
+      buttonStyle: 'border-2 border-gray-300 text-gray-900 hover:border-gray-400 hover:bg-gray-50'
+    }
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Back Button */}
-        <div className="mb-8">
-          <Link href="/" className="inline-flex items-center text-black hover:text-gray-600 transition-colors">
-            <ChevronLeft className="w-5 h-5 mr-1" />
-            <span>Back</span>
-          </Link>
-        </div>
-
-        <div className="text-center mb-8 sm:mb-12 lg:mb-16">
-          {/* Dynamic Greeting */}
-          <div className="flex items-center justify-center mb-3 text-black font-medium">
-            <Clock className="w-4 h-4 mr-2" />
-            <span>{greeting}, Welcome to our plans</span>
-          </div>
-          
-          {/* Improved Responsive Heading */}
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 mb-2 sm:mb-4 tracking-tight leading-tight">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-blue-500">
-              <span className="text-black">Choose</span> <span className="text-black">Y</span><span className="text-[#ffbd59]">our</span> Perfect Plan
-            </span>
+    <div className="min-h-screen bg-white text-gray-900">
+      {/* Hero Section */}
+      <div className="relative flex items-center justify-center px-4 pt-20 pb-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight text-black">
+            Choose Your
+            <br />
+            <span className="text-yellow-500">Perfect Plan</span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            Select the plan which suits your needs and budget.
-          </p>
         </div>
+      </div>
 
-        {/* Mobile Image - Shows between plans on small screens */}
-        <div className="block lg:hidden mb-8">
-          <div className="relative aspect-square w-full max-w-md mx-auto rounded-xl overflow-hidden shadow-lg">
-            <Image
-              src={hoveredPlan ? plans[hoveredPlan].image : "/Godfather-offer.svg"}
-              alt={hoveredPlan ? `${plans[hoveredPlan].name} Plan` : "Subscription Plans"}
-              fill
-              className="object-cover transition-opacity duration-500"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-6">
-              <div>
-                <h3 className="text-white text-xl font-bold mb-2">
-                  {hoveredPlan ? plans[hoveredPlan].name : "Our Plans"}
-                </h3>
-                <p className="text-gray-200 text-sm">
-                  {hoveredPlan 
-                    ? `Everything included in the ${plans[hoveredPlan].name} plan`
-                    : "Swipe to explore plans"}
-                </p>
-              </div>
-            </div>
+      {/* Pricing Section */}
+      <div className="px-4 pb-12">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-black">
+              Simple Pricing
+            </h2>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-          {/* Plans Section - Scrollable on mobile */}
-          <div className="lg:space-y-8">
-            {/* Mobile Scrollable Container */}
-            <div 
-              ref={scrollContainerRef}
-              className="lg:hidden flex overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4"
-              style={{ 
-                scrollbarWidth: 'none', 
-                msOverflowStyle: 'none',
-                scrollSnapType: 'x mandatory'
-              }}
-            >
-              {Object.entries(plans).map(([key, plan], index) => (
-                <div
-                  key={key}
-                  className="flex-shrink-0 w-[calc(100%-2rem)] snap-center px-2"
-                  style={{ scrollSnapAlign: 'start' }}
-                >
-                  <div 
-                    className={`relative p-8 rounded-xl border-2 transition-all duration-300 h-full ${
-                      activeIndex === index ? 'border-indigo-500 shadow-xl' : 'border-gray-200 shadow-md'
-                    }`}
-                    onClick={() => {
-                      setHoveredPlan(key as 'basic' | 'premium');
-                      scrollToPlan(index);
-                    }}
-                  >
-                    {key === "premium" && (
-                      <div className="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium flex items-center">
-                        <Sparkles className="w-4 h-4 mr-1" />
-                        Recommended
-                      </div>
-                    )}
-                    
-                    <div className="flex items-center mb-6">
-                      <div className={`p-3 rounded-lg mr-4 ${
-                        key === "basic" ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'
-                      }`}>
-                        {key === "basic" ? <Zap className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
-                      </div>
-                      <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{plan.name}</h2>
-                        <p className="text-gray-600">{plan.price} <span className="text-sm">{plan.period}</span></p>
-                      </div>
+          {/* Pricing Cards */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            {plans.map((plan, index) => (
+              <div
+                key={plan.id}
+                className={`relative group cursor-pointer transition-all duration-300 ${
+                  plan.popular ? 'md:-translate-y-4' : ''
+                }`}
+                onClick={() => setSelectedPlan(plan.id)}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+                    <div className="bg-yellow-400 text-black px-4 py-1 rounded-full text-sm font-semibold">
+                      Most Popular
                     </div>
-
-                    <ul className="space-y-3 mb-8">
-                      {plan.features.map((feature, i) => (
-                        <li key={i} className="flex items-center">
-                          <Check className="w-5 h-5 text-green-500 mr-2 flex-shrink-0" />
-                          <span className="text-gray-700">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <button
-                      className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
-                        key === "basic" ? 'bg-blue-600 hover:bg-blue-700 text-white' : 
-                        'bg-indigo-600 hover:bg-indigo-700 text-white'
-                      }`}
-                    >
-                      {plan.cta}
-                    </button>
                   </div>
-                </div>
-              ))}
-            </div>
+                )}
 
-            {/* Desktop Normal Layout */}
-            <div className="hidden lg:block lg:space-y-8">
-              {Object.entries(plans).map(([key, plan]) => (
-                <div
-                  key={key}
-                  className={`relative p-8 rounded-xl border-2 transition-all duration-300 ${
-                    hoveredPlan === key ? 'border-indigo-500 shadow-xl' : 'border-gray-200 shadow-md'
-                  }`}
-                  onMouseEnter={() => setHoveredPlan(key as 'basic' | 'premium')}
-                  onMouseLeave={() => setHoveredPlan(null)}
-                >
-                  {key === "premium" && (
-                    <div className="absolute top-0 right-0 bg-indigo-600 text-white px-3 py-1 rounded-bl-lg rounded-tr-lg text-sm font-medium flex items-center">
-                      <Sparkles className="w-4 h-4 mr-1" />
-                      Recommended
-                    </div>
-                  )}
+                <div className={`relative h-full bg-white border-2 border-t-2 border-l-2 border-r-2 border-b-0 rounded-t-2xl p-8 transition-all duration-300 overflow-hidden ${
+                  plan.popular 
+                    ? 'border-yellow-400' 
+                    : selectedPlan === plan.id 
+                      ? 'border-yellow-400' 
+                      : 'border-gray-200 hover:border-gray-300'
+                }`}>
+                  {/* Faded bottom overlay */}
+                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-gray-50/30 to-transparent pointer-events-none"></div>
                   
-                  <div className="flex items-center mb-6">
-                    <div className={`p-3 rounded-lg mr-4 ${
-                      key === "basic" ? 'bg-blue-100 text-blue-600' : 'bg-indigo-100 text-indigo-600'
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className={`p-3 rounded-xl ${
+                      plan.popular ? 'bg-yellow-400 text-black' : 'bg-gray-100 text-gray-900'
                     }`}>
-                      {key === "basic" ? <Zap className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+                      {plan.icon}
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-gray-900">{plan.name}</h2>
-                      <p className="text-gray-600">{plan.price} <span className="text-sm">{plan.period}</span></p>
+                      <h3 className="text-2xl font-bold text-black">{plan.name}</h3>
+                      <p className="text-gray-600 text-sm">{plan.description}</p>
                     </div>
                   </div>
 
-                  <ul className="space-y-3 mb-8">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center">
-                        <Check className="w-5 h-5 text-green-500 mr-2" />
+                  <div className="mb-8">
+                    <div className="flex items-baseline gap-1 mb-2">
+                      <span className="text-4xl font-bold text-black">${plan.price}</span>
+                      <span className="text-gray-600">/month</span>
+                    </div>
+                  </div>
+
+                  <ul className="space-y-4 mb-8">
+                    {plan.features.map((feature, i) => (
+                      <li key={i} className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 bg-green-100 rounded-full flex items-center justify-center">
+                          <Check className="w-3 h-3 text-green-600" />
+                        </div>
                         <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <button
-                    className={`w-full py-3 px-6 rounded-lg font-medium transition-colors ${
-                      key === "basic" ? 'bg-blue-600 hover:bg-blue-700 text-white' : 
-                      'bg-indigo-600 hover:bg-indigo-700 text-white'
-                    }`}
-                  >
-                    {plan.cta}
+                  <button className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${plan.buttonStyle}`}>
+                    {plan.buttonText}
                   </button>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Desktop Image Section */}
-          <div className="hidden lg:block sticky top-24 self-start">
-            <div className="relative aspect-square w-full rounded-xl overflow-hidden shadow-xl">
-              <Image
-                src={hoveredPlan ? plans[hoveredPlan].image : "/Godfather-offer.svg"}
-                alt={hoveredPlan ? `${plans[hoveredPlan].name} Plan` : "Subscription Plans"}
-                fill
-                className="object-cover transition-opacity duration-500"
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
-                <div>
-                  <h3 className="text-white text-2xl font-bold mb-2">
-                    {hoveredPlan ? plans[hoveredPlan].name : "Our Plans"}
-                  </h3>
-                  <p className="text-gray-200">
-                    {hoveredPlan 
-                      ? `Everything included in the ${plans[hoveredPlan].name} plan`
-                      : "Hover over a plan to see what's included"}
-                  </p>
-                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
+      </div>
 
-        {/* Mobile Scroll Indicator */}
-        <div className="flex justify-center mt-6 lg:hidden">
-          <div className="flex space-x-2">
-            {Object.keys(plans).map((key, index) => (
-              <button 
-                key={key}
-                onClick={() => scrollToPlan(index)}
-                className={`h-2 rounded-full transition-all ${
-                  activeIndex === index ? 'w-6 bg-indigo-600' : 'w-2 bg-gray-300'
-                }`}
-                aria-label={`Go to ${key} plan`}
-              />
+      {/* FAQ Section */}
+      <div className="py-20 px-4 bg-gray-50">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-black mb-6">Frequently Asked Questions</h2>
+            <p className="text-xl text-gray-600">Everything you need to know about our plans and pricing</p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div key={index} className="border border-gray-200 rounded-lg bg-white">
+                <button
+                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
+                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                >
+                  <span className="font-semibold text-black">{faq.question}</span>
+                  <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${
+                    openFaq === index ? 'rotate-180' : ''
+                  }`} />
+                </button>
+                {openFaq === index && (
+                  <div className="px-6 pb-4">
+                    <p className="text-gray-700">{faq.answer}</p>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
+
+export default SubscriptionPage;

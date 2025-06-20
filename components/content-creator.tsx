@@ -27,10 +27,53 @@ export default function ContentGenerator() {
   const [animationState, setAnimationState] = useState(0)
   const [documentIcons, setDocumentIcons] = useState<DocumentIcon[]>([])
   const [tavilyActive, setTavilyActive] = useState(false)
+  const [typedText, setTypedText] = useState("")
+  const [currentTextIndex, setCurrentTextIndex] = useState(0)
+  const [isTyping, setIsTyping] = useState(true)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const cardRef = useRef<HTMLDivElement>(null)
   const inputContainerRef = useRef<HTMLDivElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
+
+  const descriptions = [
+    "Transforming the need into captivating content",
+    "Creating professional articles and blog posts",
+    "Generating marketing copy that converts",
+    "Building comprehensive research reports",
+    "Crafting engaging social media content",
+    "Writing technical documentation with ease",
+    "Producing creative stories and narratives",
+    "Developing educational materials and guides"
+  ]
+
+  // Typing effect with faster speeds
+  useEffect(() => {
+    const currentDescription = descriptions[currentTextIndex]
+    let timeoutId: NodeJS.Timeout
+
+    if (isTyping) {
+      if (typedText.length < currentDescription.length) {
+        timeoutId = setTimeout(() => {
+          setTypedText(currentDescription.slice(0, typedText.length + 1))
+        }, 20) // Reduced from 50 to 20ms for faster typing
+      } else {
+        timeoutId = setTimeout(() => {
+          setIsTyping(false)
+        }, 70) // Reduced from 1000 to 500ms for faster pause
+      }
+    } else {
+      if (typedText.length > 0) {
+        timeoutId = setTimeout(() => {
+          setTypedText(typedText.slice(0, -1))
+        }, 15) // Reduced from 30 to 15ms for faster deletion
+      } else {
+        setCurrentTextIndex((prev) => (prev + 1) % descriptions.length)
+        setIsTyping(true)
+      }
+    }
+
+    return () => clearTimeout(timeoutId)
+  }, [typedText, isTyping, currentTextIndex, descriptions])
 
   const adjustTextareaHeight = () => {
     if (textareaRef.current) {
@@ -84,6 +127,24 @@ export default function ContentGenerator() {
     window.addEventListener("resize", handleResize)
     return () => window.removeEventListener("resize", handleResize)
   }, [])
+
+  const generateFileName = (prompt: string): string => {
+    // Remove common words and keep meaningful terms
+    const commonWords = ['the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'about', 'how', 'what', 'why', 'when', 'where', 'write', 'create', 'generate', 'make', 'build', 'develop']
+    
+    const words = prompt
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !commonWords.includes(word))
+      .slice(0, 3) // Take first 3 meaningful words
+    
+    if (words.length === 0) {
+      return 'content'
+    }
+    
+    return words.join('-')
+  }
 
   const toggleTavily = () => {
     setTavilyActive(!tavilyActive)
@@ -147,7 +208,8 @@ export default function ContentGenerator() {
     try {
       const fullContent = await simulateGeneratingContent(input.trim());
       setGeneratedContent(fullContent);
-      setFileName(`${input.trim().toLowerCase().replace(/\s+/g, '-')}.md`);
+      const shortFileName = generateFileName(input.trim());
+      setFileName(`${shortFileName}.md`);
       toast.success('Content generated successfully!');
     } catch (error) {
       console.error('Error:', error);
@@ -221,6 +283,17 @@ export default function ContentGenerator() {
             opacity: 0;
           }
         }
+        
+        .typing-cursor::after {
+          content: '|';
+          animation: blink 1s infinite;
+          color: rgba(255, 255, 255, 0.8);
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
       `}</style>
 
       <Card
@@ -273,10 +346,10 @@ export default function ContentGenerator() {
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-white mb-1 flex items-center">
                 <Sparkles className="h-5 w-5 mr-2" />
-                ADOOX AI
+                Noether AI
               </h2>
-              <p className="text-sm sm:text-base text-white text-opacity-80">
-                Transforming the need into captivating content
+              <p className="text-sm sm:text-base text-white text-opacity-80 h-6 typing-cursor">
+                {typedText}
               </p>
             </div>
           </div>

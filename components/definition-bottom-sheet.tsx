@@ -163,7 +163,7 @@ export default function DefinitionBottomSheet({
       setChatMessages([
         {
           sender: "assistant",
-          text: "Hi! I'm your document assistant. You can ask me questions about the uploaded document or anything else.",
+          text: "Hi! I'm Noether AI your document files assistant. You can ask me questions about the uploaded document or anything else.",
         },
       ])
     }

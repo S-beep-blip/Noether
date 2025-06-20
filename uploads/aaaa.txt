@@ -1,0 +1,729 @@
+# Experiment 1: Tokenization, Lemmatization, Stemming, Stop words removal, and Regular Expressions
+import nltk
+import re
+from nltk.tokenize import word_tokenize, sent_tokenize
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.corpus import stopwords
+
+# Sample text
+text = "Natural Language Processing is an exciting field. It involves making computers understand human languages. We will explore tokenization, stemming, and lemmatization."
+
+print("Original Text:\n", text)
+
+# 1. Tokenization
+print("\n--- Tokenization ---")
+# Sentence Tokenization
+sentences = sent_tokenize(text)
+print("Sentences:", sentences)
+# Word Tokenization
+words = word_tokenize(text.lower()) # Convert to lowercase for consistency
+print("Words:", words)
+
+# 2. Stemming
+print("\n--- Stemming ---")
+porter = PorterStemmer()
+stemmed_words = [porter.stem(word) for word in words]
+print("Stemmed Words:", stemmed_words)
+
+# 3. Lemmatization
+print("\n--- Lemmatization ---")
+lemmatizer = WordNetLemmatizer()
+# Note: Lemmatization can be improved by providing Part-of-Speech tags
+lemmatized_words = [lemmatizer.lemmatize(word) for word in words]
+print("Lemmatized Words (without POS tags):", lemmatized_words)
+# Example with POS tag (simplified for demonstration)
+lemmatized_words_pos = [lemmatizer.lemmatize(word, pos='v') for word in words] # Assuming all are verbs
+# print("Lemmatized Words (assuming verbs):", lemmatized_words_pos)
+
+
+# 4. Stop Words Removal
+print("\n--- Stop Words Removal ---")
+stop_words = set(stopwords.words('english'))
+filtered_words = [word for word in words if word.isalnum() and word not in stop_words] # also remove punctuation
+print("Words after Stopword Removal:", filtered_words)
+
+# 5. Regular Expressions
+print("\n--- Regular Expressions ---")
+# a. Search for a pattern (e.g., words starting with 'lang')
+pattern_search = r"\blang\w*"
+found = re.findall(pattern_search, text, re.IGNORECASE)
+print(f"Words matching '{pattern_search}': {found}")
+
+# b. Split text by a delimiter (e.g., sentences based on punctuation)
+pattern_split = r"[.!?]"
+sentences_re = re.split(pattern_split, text)
+print("Sentences split by regex:", [s.strip() for s in sentences_re if s.strip()])
+
+# c. Substitution (e.g., replace 'NLP' with its full form)
+pattern_sub = r"\bNLP\b"
+substituted_text = re.sub(pattern_sub, "Natural Language Processing", text)
+print("Text after substitution:", substituted_text)
+
+# Example paragraph for exercise
+paragraph = """Tokenization is the first step. Stemming reduces words to their root form, which may not be a valid word.
+Lemmatization, on the other hand, reduces words to their dictionary form (lemma).
+Stop words like 'is', 'a', 'the' are often removed."""
+
+print("\n--- Processing Sample Paragraph ---")
+words_p = word_tokenize(paragraph.lower())
+print("Tokens:", words_p)
+
+stemmed_p = [porter.stem(w) for w in words_p if w.isalnum()]
+print("Stemmed:", stemmed_p)
+
+lemmatized_p = [lemmatizer.lemmatize(w) for w in words_p if w.isalnum()]
+print("Lemmatized:", lemmatized_p)
+
+filtered_p = [w for w in words_p if w.isalnum() and w not in stop_words]
+print("Stop words removed:", filtered_p)
+
+--------------------------------
+
+# Experiment 2: Bag of Words, TF-IDF
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+# Sample documents
+doc1 = "The cat sat on the mat."
+doc2 = "The dog played in the park."
+doc3 = "The cat and the dog are friends."
+corpus = [doc1, doc2, doc3]
+
+print("Corpus:\n", corpus)
+
+# 1. Bag of Words (BoW)
+print("\n--- Bag of Words (BoW) ---")
+vectorizer_bow = CountVectorizer()
+bow_matrix = vectorizer_bow.fit_transform(corpus)
+print("Feature Names (Vocabulary):", vectorizer_bow.get_feature_names_out())
+print("BoW Matrix (dense):\n", bow_matrix.toarray())
+
+# 2. TF-IDF (Term Frequency-Inverse Document Frequency)
+print("\n--- TF-IDF ---")
+vectorizer_tfidf = TfidfVectorizer()
+tfidf_matrix = vectorizer_tfidf.fit_transform(corpus)
+print("Feature Names (Vocabulary):", vectorizer_tfidf.get_feature_names_out())
+print("TF-IDF Matrix (dense):\n", tfidf_matrix.toarray())
+
+# To see TF-IDF values for specific terms
+# print("\nTF-IDF values for specific terms:")
+# feature_names = vectorizer_tfidf.get_feature_names_out()
+# for i, doc in enumerate(corpus):
+# print(f"Document {i+1}:")
+# for j, term in enumerate(feature_names):
+# tfidf_score = tfidf_matrix[i, j]
+# if tfidf_score > 0:
+# print(f" '{term}': {tfidf_score:.4f}")
+
+--------------------------------
+
+# Experiment 3: Word2Vec, Word Embeddings
+from gensim.models import Word2Vec
+from nltk.tokenize import word_tokenize
+
+# Sample sentences for training Word2Vec
+# In a real scenario, you'd use a much larger corpus
+corpus_text = [
+"king is a strong man",
+"queen is a wise woman",
+"man is a human",
+"woman is a human",
+"king and queen rule the kingdom",
+"boy is a young man",
+"girl is a young woman"
+]
+
+print("Training Corpus:\n", corpus_text)
+
+# Tokenize the corpus
+tokenized_corpus = [word_tokenize(sentence.lower()) for sentence in corpus_text]
+print("\nTokenized Corpus for Word2Vec:\n", tokenized_corpus)
+
+# Train Word2Vec model
+# Parameters:
+# - sentences: The tokenized corpus
+# - vector_size: Dimensionality of the word vectors (e.g., 100)
+# - window: Maximum distance between the current and predicted word within a sentence
+# - min_count: Ignores all words with total frequency lower than this
+# - workers: Number of CPU cores to use for training
+# - sg: Training algorithm: 1 for skip-gram; otherwise CBOW (0).
+model_w2v = Word2Vec(sentences=tokenized_corpus, vector_size=50, window=5, min_count=1, sg=0, workers=4)
+
+print("\n--- Word2Vec ---")
+
+# Get the vocabulary
+vocabulary = list(model_w2v.wv.index_to_key)
+print("\nModel Vocabulary:", vocabulary)
+
+# Get the vector for a specific word
+try:
+vector_king = model_w2v.wv['king']
+print("\nVector for 'king':\n", vector_king)
+print("Vector size:", len(vector_king))
+except KeyError:
+print("\n'king' not in vocabulary.")
+
+
+# Find similar words
+try:
+similar_to_king = model_w2v.wv.most_similar('king', topn=3)
+print("\nWords most similar to 'king':", similar_to_king)
+except KeyError:
+print("\n'king' not in vocabulary to find similar words.")
+
+try:
+similar_to_woman = model_w2v.wv.most_similar('woman', topn=3)
+print("\nWords most similar to 'woman':", similar_to_woman)
+except KeyError:
+print("\n'woman' not in vocabulary to find similar words.")
+
+# Analogy: king - man + woman = queen
+try:
+analogy_result = model_w2v.wv.most_similar(positive=['king', 'woman'], negative=['man'], topn=1)
+print("\nAnalogy 'king - man + woman':", analogy_result) # Expected: queen
+except KeyError as e:
+print(f"\nCould not perform analogy, word not in vocab: {e}")
+
+
+print("\n--- Word Embeddings ---")
+print("Word embeddings are the vectors learned by models like Word2Vec.")
+print("For example, the vector for 'queen' is its embedding:")
+try:
+embedding_queen = model_w2v.wv['queen']
+print(embedding_queen)
+except KeyError:
+print("'queen' not in vocabulary.")
+
+# Note: For more robust results, Word2Vec needs a much larger and diverse corpus.
+# Pre-trained models (like GloVe or FastText from Gensim library, or spaCy's built-in vectors)
+# are often used for practical applications if you don't have a massive dataset for training.
+# Example: python -m spacy download en_core_web_md (for medium model with vectors)
+# import spacy
+# nlp = spacy.load("en_core_web_md")
+# doc = nlp("king queen man woman")
+# print(doc[0].text, doc[0].vector)
+
+--------------------------------
+
+# Experiment 4: Minimum Edit Distance (Levenshtein Distance)
+import nltk # NLTK provides a direct function for this
+
+def levenshtein_distance_custom(s1, s2):
+"""
+A simple implementation of Levenshtein distance.
+For assignments, nltk.edit_distance is usually sufficient and preferred.
+"""
+if len(s1) < len(s2):
+return levenshtein_distance_custom(s2, s1)
+
+if len(s2) == 0:
+return len(s1)
+
+previous_row = range(len(s2) + 1)
+for i, c1 in enumerate(s1):
+current_row = [i + 1]
+for j, c2 in enumerate(s2):
+insertions = previous_row[j + 1] + 1
+deletions = current_row[j] + 1
+substitutions = previous_row[j] + (c1 != c2)
+current_row.append(min(insertions, deletions, substitutions))
+previous_row = current_row
+
+return previous_row[-1]
+
+# Strings for comparison
+string1 = "kitten"
+string2 = "sitting"
+
+string3 = "sunday"
+string4 = "saturday"
+
+string5 = "intention"
+string6 = "execution"
+
+print(f"--- Minimum Edit Distance (Levenshtein) ---")
+
+# Using NLTK's built-in function
+dist_nltk1 = nltk.edit_distance(string1, string2)
+print(f"NLTK Edit distance between '{string1}' and '{string2}': {dist_nltk1}")
+
+dist_nltk2 = nltk.edit_distance(string3, string4)
+print(f"NLTK Edit distance between '{string3}' and '{string4}': {dist_nltk2}")
+
+dist_nltk3 = nltk.edit_distance(string5, string6)
+print(f"NLTK Edit distance between '{string5}' and '{string6}': {dist_nltk3}")
+
+# Using custom function (for understanding, not typically required if NLTK is allowed)
+# print("\n--- Using Custom Levenshtein Implementation ---")
+# dist_custom1 = levenshtein_distance_custom(string1, string2)
+# print(f"Custom Edit distance between '{string1}' and '{string2}': {dist_custom1}")
+
+# dist_custom2 = levenshtein_distance_custom(string3, string4)
+# print(f"Custom Edit distance between '{string3}' and '{string4}': {dist_custom2}")
+
+# dist_custom3 = levenshtein_distance_custom(string5, string6)
+# print(f"Custom Edit distance between '{string5}' and '{string6}': {dist_custom3}")
+
+# Exercise example:
+str_a = "apple"
+str_b = "apply"
+print(f"\nExercise: Edit distance between '{str_a}' and '{str_b}': {nltk.edit_distance(str_a, str_b)}")
+
+str_c = "analyze"
+str_d = "analyse"
+print(f"Exercise: Edit distance between '{str_c}' and '{str_d}': {nltk.edit_distance(str_c, str_d)}")
+
+--------------------------------
+
+# Experiment 5: N-Gram Models
+import nltk
+from nltk.util import ngrams
+from nltk.tokenize import word_tokenize
+from collections import Counter
+
+# Sample text
+text = "Natural language processing is fascinating. We study language models like n-grams."
+print("Original Text:\n", text)
+
+# Tokenize the text
+tokens = word_tokenize(text.lower())
+print("\nTokens:", tokens)
+
+# 1. Bigrams (N=2)
+print("\n--- Bigrams ---")
+bigrams = list(ngrams(tokens, 2))
+print("Generated Bigrams:", bigrams)
+bigram_freq = Counter(bigrams)
+print("Bigram Frequencies:", bigram_freq.most_common(5)) # Display top 5
+
+# 2. Trigrams (N=3)
+print("\n--- Trigrams ---")
+trigrams = list(ngrams(tokens, 3))
+print("Generated Trigrams:", trigrams)
+trigram_freq = Counter(trigrams)
+print("Trigram Frequencies:", trigram_freq.most_common(5)) # Display top 5
+
+# 3. Generic N-grams (e.g., N=4)
+print("\n--- Quadgrams (N=4) ---")
+n_value = 4
+quadgrams = list(ngrams(tokens, n_value))
+print(f"Generated {n_value}-grams:", quadgrams)
+quadgram_freq = Counter(quadgrams)
+print(f"{n_value}-gram Frequencies:", quadgram_freq.most_common(5)) # Display top 5
+
+
+# Function to generate and analyze N-grams
+def analyze_ngrams(text, n):
+tokens_ng = word_tokenize(text.lower())
+if len(tokens_ng) < n:
+print(f"Text too short for {n}-grams.")
+return None, None
+
+n_grams_list = list(ngrams(tokens_ng, n))
+n_gram_frequencies = Counter(n_grams_list)
+return n_grams_list, n_gram_frequencies
+
+print("\n--- N-gram Analysis Example (Python code to analyze) ---")
+sample_sentence = "This is a sample sentence for n-gram analysis."
+
+# Analyze Bigrams
+bigrams_list, bigram_counts = analyze_ngrams(sample_sentence, 2)
+if bigrams_list:
+print("Bigrams found:", bigrams_list)
+print("Bigram counts:", bigram_counts)
+
+# Analyze Trigrams
+trigrams_list, trigram_counts = analyze_ngrams(sample_sentence, 3)
+if trigrams_list:
+print("\nTrigrams found:", trigrams_list)
+print("Trigram counts:", trigram_counts)
+
+# Analyze N-gram (e.g., 1-gram or unigram)
+unigrams_list, unigram_counts = analyze_ngrams(sample_sentence, 1)
+if unigrams_list:
+print("\nUnigrams found:", unigrams_list) # These are essentially the tokens
+print("Unigram counts:", unigram_counts)
+
+--------------------------------
+
+# Experiment 6: Cosine for measuring similarity
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Sample documents
+doc1 = "The quick brown fox jumps over the lazy dog."
+doc2 = "A fast brown fox leaps above a sleepy dog."
+doc3 = "The weather is sunny today."
+doc_list = [doc1, doc2, doc3]
+
+print("Documents:")
+for i, doc in enumerate(doc_list):
+print(f"Doc {i+1}: {doc}")
+
+# 1. Vectorize the documents using TF-IDF
+# This converts text into numerical vectors that can be used for cosine similarity
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(doc_list)
+
+print("\nTF-IDF Matrix Shape:", tfidf_matrix.shape)
+# print("Feature names:", vectorizer.get_feature_names_out()) # To see the vocabulary
+
+# 2. Calculate Cosine Similarity
+# cosine_similarity calculates similarity between all pairs of documents
+
+# Similarity between doc1 and doc2
+# tfidf_matrix[0:1] is the vector for doc1
+# tfidf_matrix[1:2] is the vector for doc2
+cosine_sim_1_2 = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])
+print(f"\nCosine Similarity between Doc 1 and Doc 2: {cosine_sim_1_2[0][0]:.4f}")
+
+# Similarity between doc1 and doc3
+cosine_sim_1_3 = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[2:3])
+print(f"Cosine Similarity between Doc 1 and Doc 3: {cosine_sim_1_3[0][0]:.4f}")
+
+# Similarity between doc2 and doc3
+cosine_sim_2_3 = cosine_similarity(tfidf_matrix[1:2], tfidf_matrix[2:3])
+print(f"Cosine Similarity between Doc 2 and Doc 3: {cosine_sim_2_3[0][0]:.4f}")
+
+# Calculate the full similarity matrix
+# This compares every document with every other document (including itself)
+cosine_sim_matrix = cosine_similarity(tfidf_matrix)
+print("\nFull Cosine Similarity Matrix:\n", cosine_sim_matrix)
+print("(Row/Col 0 is Doc1, 1 is Doc2, 2 is Doc3)")
+
+# Exercise: Develop a python code to perform the task
+text_data_set = [
+"Natural language processing is fun.",
+"NLP techniques are useful for text analysis.",
+"Machine learning and deep learning drive NLP advancements."
+]
+
+print("\n--- Exercise with new text data set ---")
+print("Text Data Set:")
+for i, text in enumerate(text_data_set):
+print(f"Text {i+1}: {text}")
+
+tfidf_matrix_exercise = vectorizer.fit_transform(text_data_set)
+cosine_sim_matrix_exercise = cosine_similarity(tfidf_matrix_exercise)
+
+print("\nCosine Similarity Matrix for Exercise Data Set:\n", cosine_sim_matrix_exercise)
+print(f"Similarity between Text 1 and Text 2: {cosine_sim_matrix_exercise[0,1]:.4f}")
+print(f"Similarity between Text 1 and Text 3: {cosine_sim_matrix_exercise[0,2]:.4f}")
+print(f"Similarity between Text 2 and Text 3: {cosine_sim_matrix_exercise[1,2]:.4f}")
+
+--------------------------------
+
+# Experiment 7: Part of Speech Tagging using Hidden Markov Model and Viterbi algorithm
+# NLTK's default POS tagger (averaged_perceptron_tagger) is efficient and often based on principles
+# related to HMMs/MEMMs. Implementing a full HMM and Viterbi from scratch is complex
+# for a small assignment, so we use NLTK's readily available tagger.
+
+import nltk
+from nltk.tokenize import word_tokenize
+
+# Ensure 'averaged_perceptron_tagger' is downloaded
+# nltk.download('averaged_perceptron_tagger')
+# nltk.download('punkt')
+
+# Sample text
+text = "The quick brown fox jumps over the lazy dog. He is very energetic."
+print("Original Text:\n", text)
+
+# Tokenize the text
+tokens = word_tokenize(text)
+print("\nTokens:", tokens)
+
+# Perform POS Tagging
+# NLTK's `pos_tag` uses the PerceptronTagger by default, which is a good sequence model.
+# While not explicitly an HMM with Viterbi that you code line-by-line here,
+# it serves the purpose for an assignment demonstrating POS tagging.
+# HMMs are a foundational concept for such taggers.
+pos_tags_nltk = nltk.pos_tag(tokens)
+
+print("\n--- Part of Speech Tagging (using NLTK's default tagger) ---")
+print("POS Tags:", pos_tags_nltk)
+
+# For understanding HMM and Viterbi conceptually, you would typically:
+# 1. Define states (POS tags like NN, VB, JJ, etc.).
+# 2. Define observations (words).
+# 3. Estimate Transition Probabilities P(tag_i | tag_{i-1}) from a tagged corpus.
+# 4. Estimate Emission Probabilities P(word | tag) from a tagged corpus.
+# 5. Implement the Viterbi algorithm to find the most likely sequence of tags for a new sentence.
+
+# NLTK does have an HMM module, but it's more involved to train and use from scratch
+# for a simple assignment compared to the readily available pos_tag.
+# from nltk.tag import hmm
+# from nltk.corpus import treebank
+# Train an HMM tagger (this is more involved)
+# trainer = hmm.HiddenMarkovModelTrainer()
+# tagger_hmm = trainer.train_supervised(treebank.tagged_sents()[:100]) # Train on a small subset
+# print("\n--- POS Tagging with a trained NLTK HMM (example) ---")
+# text_for_hmm = "This is a test sentence for HMM."
+# tokens_hmm = word_tokenize(text_for_hmm)
+# print("HMM POS Tags for '", text_for_hmm, "':", tagger_hmm.tag(tokens_hmm))
+# Note: Training a good HMM requires a significant tagged corpus and more setup.
+
+print("\n--- Exercise: POS tagging based on Hidden Markov Model and Viterbi algorithm ---")
+# The aim is to implement POS tagging. NLTK's `pos_tag` is a practical way.
+# If you need to show the *use* of HMM/Viterbi rather than *implement* them from scratch,
+# referencing that `nltk.pos_tag` or similar library functions often rely on these
+# underlying principles (or advanced versions like MEMM, CRF) is usually acceptable.
+
+exercise_sentence = "The cat sat on the mat with a gentle thud."
+exercise_tokens = word_tokenize(exercise_sentence)
+exercise_pos_tags = nltk.pos_tag(exercise_tokens)
+
+print("\nPOS tagging for exercise sentence: '", exercise_sentence, "'")
+print(exercise_pos_tags)
+
+# Example of what the tags mean:
+# NN: Noun, singular or mass
+# DT: Determiner
+# VBZ: Verb, 3rd person singular present
+# IN: Preposition or subordinating conjunction
+# JJ: Adjective
+# NNS: Noun, plural
+# .: Punctuation
+
+--------------------------------
+
+# Experiment 8: Probabilistic Context Free Grammar (PCFG)
+import nltk
+from nltk.grammar import PCFG
+from nltk.parse import pchart # Probabilistic Chart Parser (uses CYK variant)
+
+# Define a PCFG
+# Rules are of the form: NonTerminal -> Expansion [Probability]
+# Sum of probabilities for all productions from the same non-terminal must be 1.0
+pcfg_grammar_str = """
+S -> NP VP [1.0]
+VP -> V NP [0.6] | V PP [0.4]
+PP -> P NP [1.0]
+V -> 'saw' [0.5] | 'ate' [0.3] | 'walked' [0.2]
+NP -> 'John' [0.2] | 'Mary' [0.2] | Det N [0.4] | Det N PP [0.2]
+Det -> 'a' [0.5] | 'the' [0.5]
+N -> 'man' [0.5] | 'dog' [0.3] | 'telescope' [0.2]
+P -> 'with' [0.6] | 'in' [0.4]
+"""
+
+print("--- Probabilistic Context Free Grammar (PCFG) ---")
+try:
+pcfg_grammar = PCFG.fromstring(pcfg_grammar_str)
+print("\nPCFG Grammar:")
+for prod in pcfg_grammar.productions():
+print(prod)
+
+# Create a probabilistic parser (e.g., Probabilistic Chart Parser)
+# NLTK's ViterbiParser can also be used with PCFGs.
+parser = pchart.InsideChartParser(pcfg_grammar)
+# Alternative: from nltk.parse import ViterbiParser
+# parser = ViterbiParser(pcfg_grammar)
+
+
+print("\n--- Parsing a sentence with PCFG ---")
+sentence_str = "John saw a man with a telescope"
+tokens = sentence_str.lower().split() # Assumes tokenizer matches grammar terminals
+print("Sentence to parse:", tokens)
+
+# Parse the sentence
+# The parser will find the most probable parse(s)
+# For InsideChartParser, it calculates the total probability of the string.
+# For ViterbiParser, it finds the single most probable parse tree.
+
+# Using ViterbiParser for a single most probable tree
+from nltk.parse import ViterbiParser
+viterbi_parser = ViterbiParser(pcfg_grammar)
+parses = list(viterbi_parser.parse(tokens))
+
+if parses:
+print("\nMost probable parse tree(s):")
+for tree in parses:
+print(tree)
+tree.pretty_print()
+print(f"Probability of this parse: {tree.prob():.6e}")
+else:
+print("No parse found for the sentence with this grammar.")
+
+# Example of analyzing another sentence
+sentence2_str = "Mary ate the dog"
+tokens2 = sentence2_str.lower().split()
+print("\nParsing another sentence:", tokens2)
+parses2 = list(viterbi_parser.parse(tokens2))
+if parses2:
+for tree in parses2:
+tree.pretty_print()
+print(f"Probability: {tree.prob():.6e}")
+else:
+print("No parse found for the second sentence.")
+
+except ValueError as e:
+print(f"Error creating PCFG: {e}")
+print("Ensure probabilities for productions from the same non-terminal sum to 1.0.")
+print("And ensure all terminals are quoted.")
+
+print("\n--- Exercise: To develop a python code to analyse PCFG. ---")
+print("The code above demonstrates defining a PCFG, parsing sentences,")
+print("and obtaining the most probable parse trees with their probabilities.")
+print("Analysis could involve: ")
+print("1. Defining a more complex grammar.")
+print("2. Parsing various sentences and observing the resulting trees and probabilities.")
+print("3. Modifying probabilities in the grammar to see how parse preferences change.")
+print("4. Calculating the probability of a sentence given the grammar (sum of probabilities of all its parses).")
+
+# To get total probability of a sentence (sum over all parses) using InsideChartParser:
+# parser_inside = pchart.InsideChartParser(pcfg_grammar)
+# parser_inside.parse(tokens)
+# print(f"Total probability of '{' '.join(tokens)}' given the grammar: {parser_inside.probability():.4e}")
+
+--------------------------------
+
+# Experiment 9: Chunking
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.tag import pos_tag
+
+# Sample sentence
+sentence = "The little yellow dog barked at the big cat."
+print("Original Sentence:\n", sentence)
+
+# Tokenize and POS tag the sentence
+tokens = word_tokenize(sentence)
+tagged_tokens = pos_tag(tokens)
+print("\nPOS Tagged Tokens:\n", tagged_tokens)
+
+# Define a chunking grammar using regular expressions
+# This grammar defines patterns for Noun Phrases (NP)
+# <DT>? : Optional Determiner
+# <JJ>* : Zero or more Adjectives
+# <NN.*>+ : One or more Nouns (any type: NN, NNS, NNP, NNPS)
+# We can define multiple chunk patterns.
+# A simple NP chunker:
+grammar_np = r"""
+NP: {<DT>?<JJ>*<NN.*>+} # Chunk sequences of DT, JJ, NN
+"""
+# A more complex grammar for NPs and VPs
+grammar_vp_np = r"""
+NP: {<DT>?<JJ>*<NN.*>+} # Chunk Noun Phrases
+PP: {<IN><NP>} # Chunk Prepositional Phrases (prep followed by NP)
+VP: {<VB.*><NP|PP>*} # Chunk Verb Phrases (verb followed by NP or PP)
+"""
+
+print("\n--- Chunking with a simple Noun Phrase (NP) grammar ---")
+# Create a RegexpParser with the grammar
+chunk_parser_np = nltk.RegexpParser(grammar_np)
+# Parse the tagged tokens to get chunks
+tree_np = chunk_parser_np.parse(tagged_tokens)
+print("Chunk Tree (NP only):\n", tree_np)
+# tree_np.draw() # This will open a new window to display the tree if tkinter is set up
+
+print("\nExtracted Noun Phrases (NPs):")
+for subtree in tree_np.subtrees():
+if subtree.label() == 'NP':
+print(subtree)
+print(" ".join(token for token, pos in subtree.leaves()))
+
+
+print("\n--- Chunking with NP, PP, and VP grammar ---")
+chunk_parser_vp_np = nltk.RegexpParser(grammar_vp_np)
+tree_vp_np = chunk_parser_vp_np.parse(tagged_tokens)
+print("Chunk Tree (NP, PP, VP):\n", tree_vp_np)
+# tree_vp_np.draw()
+
+print("\nExtracted Phrases based on VP/NP/PP grammar:")
+for subtree in tree_vp_np.subtrees():
+if subtree.label() in ['NP', 'VP', 'PP']:
+print(f"{subtree.label()}: {' '.join(token for token, pos in subtree.leaves())}")
+
+
+# Exercise: To develop a Python code to extract meaningful phrases (chunks) from unstructured text data.
+print("\n--- Exercise Example ---")
+exercise_text = "Natural Language Processing enables computers to understand human speech and text. Machine learning algorithms are often used."
+exercise_tokens = word_tokenize(exercise_text)
+exercise_tagged_tokens = pos_tag(exercise_tokens)
+print("Tagged Exercise Text:", exercise_tagged_tokens)
+
+# Using the NP chunker
+exercise_tree_np = chunk_parser_np.parse(exercise_tagged_tokens)
+print("\nNP Chunks from exercise text:")
+for subtree in exercise_tree_np.subtrees(filter=lambda t: t.label() == 'NP'):
+print(" ".join(token for token, pos in subtree.leaves()))
+
+# Using the more complex chunker
+exercise_tree_vp_np = chunk_parser_vp_np.parse(exercise_tagged_tokens)
+print("\nNP, PP, VP Chunks from exercise text:")
+for subtree in exercise_tree_vp_np.subtrees(filter=lambda t: t.label() in ['NP', 'VP', 'PP']):
+print(f"{subtree.label()}: {' '.join(token for token, pos in subtree.leaves())}")
+
+--------------------------------
+
+# Experiment 10: Named Entity Recognition (NER)
+import spacy
+
+# Load the pre-trained spaCy model
+# Make sure you've downloaded it: python -m spacy download en_core_web_sm
+try:
+nlp = spacy.load("en_core_web_sm")
+except OSError:
+print("Downloading 'en_core_web_sm' model...")
+spacy.cli.download("en_core_web_sm")
+nlp = spacy.load("en_core_web_sm")
+
+
+# Sample text
+text1 = "Apple is looking at buying U.K. startup for $1 billion in London."
+text2 = "Sundar Pichai, the CEO of Google, announced new AI features at the conference in New York City on May 10th, 2024."
+
+print("--- Named Entity Recognition (NER) using spaCy ---")
+
+def perform_ner(text_to_analyze):
+print(f"\nAnalyzing text: \"{text_to_analyze}\"")
+doc = nlp(text_to_analyze)
+
+if not doc.ents:
+print("No named entities found.")
+return
+
+print("Named Entities Found:")
+for ent in doc.ents:
+print(f" Text: {ent.text}, Label: {ent.label_}, Explanation: {spacy.explain(ent.label_)}")
+
+# Perform NER on the sample texts
+perform_ner(text1)
+perform_ner(text2)
+
+# Exercise: To develop a python code to perform NER tasks
+print("\n--- Exercise Example ---")
+exercise_text = """
+Microsoft Corporation, based in Redmond, Washington, was co-founded by Bill Gates and Paul Allen on April 4, 1975.
+Last year, they reported revenues of over $200 billion.
+The current CEO is Satya Nadella. They have offices in many countries, including India.
+"""
+perform_ner(exercise_text)
+
+# Using NLTK for NER (alternative, generally less accurate than spaCy for general NER)
+# import nltk
+# from nltk.tokenize import word_tokenize
+# from nltk.tag import pos_tag
+# from nltk.chunk import ne_chunk
+# nltk.download('maxent_ne_chunker', quiet=True)
+# nltk.download('words', quiet=True)
+
+# def ner_with_nltk(text):
+# print(f"\nAnalyzing with NLTK: \"{text[:50]}...\"")
+# tokens = word_tokenize(text)
+# tagged_tokens = pos_tag(tokens)
+# tree = ne_chunk(tagged_tokens)
+# print("NLTK NER Tree:\n", tree)
+# tree.draw() # if you want to visualize
+# print("Named Entities (NLTK):")
+# for subtree in tree.subtrees():
+# if hasattr(subtree, 'label') and subtree.label():
+# if subtree.label() != 'S': # Exclude sentence itself
+# entity_text = ' '.join([word for word, tag in subtree.leaves()])
+# print(f" Text: {entity_text}, Label: {subtree.label()}")
+
+# print("\n--- NER using NLTK (for comparison/alternative) ---")
+# ner_with_nltk(text1)
+# ner_with_nltk(exercise_text)
+
+--------------------------------
+

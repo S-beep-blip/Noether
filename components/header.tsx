@@ -81,24 +81,26 @@ export default function Header({
           {/* SVG Logo */}
           <div className="relative w-12 h-12">
             <Image
-              src="/logoo.png"
-              alt="Adoox logo"
-              width={32}
-              height={32}
-              className="select-none"
+              src="/Sollem - Logo.svg"
+              alt="Sollem logo"
+              width={48}
+              height={48}
+              className="object-contain select-none"
+              priority
             />
           </div>
-          
-          <h1 className="text-3xl font-semibold text-center select-none hero-regular -ml-3 translate-y-1 tracking-tight leading-tight">
-            <span className="text-black">a</span><span className="text-[#ffbd59]">doox</span>
-          </h1>
-          <span className="absolute -top-3 -right-8 bg-black text-white text-[9px] px-1 py-0.5 rounded font-medium select-none"
-            style={{
-              pointerEvents: 'none'
-            }}
-          >
-            Alpha
-          </span>
+          <div className="relative inline-block top-2 ml-3">
+            <h1 className="text-3xl font-semibold text-center select-none hero-regular -ml-3 tracking-tight leading-tight">
+              <span className="text-black">Noe</span><span className="text-[#ffbd59]">ther</span>
+            </h1>
+            <span className="absolute -top-3 -right-8 bg-black text-white text-[9px] px-1 py-0.5 rounded font-medium select-none"
+              style={{
+                pointerEvents: 'none'
+              }}
+            >
+              Alpha
+            </span>
+          </div>
         </div>
       </div>
       
