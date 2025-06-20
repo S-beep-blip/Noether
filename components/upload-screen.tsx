@@ -155,7 +155,7 @@ export default function UploadScreen({ handleFileUpload, loading }: UploadScreen
           const formData = new FormData()
           formData.append("file", selectedFile)
 
-          const uploadResponse = await fetch("/api/upload", {
+          const uploadResponse = await fetch("http://localhost:8000/api/upload", {
             method: "POST",
             body: formData,
           })
@@ -167,7 +167,7 @@ export default function UploadScreen({ handleFileUpload, loading }: UploadScreen
           const { filePath } = await uploadResponse.json()
 
           // Start preview streaming from Gemini
-          const response = await fetch("/api/process-with-gemini", {
+          const response = await fetch("http://localhost:8000/api/process-with-gemini", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",

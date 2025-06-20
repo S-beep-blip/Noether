@@ -153,7 +153,7 @@ export default function ContentGenerator() {
 
   const simulateGeneratingContent = async (topic: string) => {
     try {
-      const response = await fetch('/api/generate-content', {
+      const response = await fetch('http://localhost:8000/api/generate-content', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
